@@ -1,5 +1,5 @@
 import { NFT_CONTRACT_ABI, NFT_CONTRACT_ADDRESS } from "./contract";
-import Web3 from "web3";
+
 const getBalance = async (address) => {
   try {
     const balance = await web3.eth.getBalance(address);
@@ -40,7 +40,7 @@ const createNFT = async (uri, price, address) => {
     console.log(account);
     const weiValue = window.web3.utils.toWei(price.toString(), "ether");
     console.log(weiValue);
-    
+
     // const tx = await contract.methods
     //   .createNFT("uri", '2')
     //   .send({ from: account, gas: 3000000 })
@@ -53,9 +53,11 @@ const createNFT = async (uri, price, address) => {
     //   .on("receipt", (receipt) => {
     //     console.log(receipt);
     //   });
-    const gasEstimate = await contract.methods.createNFT(uri, weiValue).estimateGas({
-      from: account,
-    });
+    const gasEstimate = await contract.methods
+      .createNFT(uri, weiValue)
+      .estimateGas({
+        from: account,
+      });
     console.log(gasEstimate);
 
     const encode = await contract.methods.createNFT(uri, weiValue).encodeABI();
@@ -73,52 +75,38 @@ const createNFT = async (uri, price, address) => {
   }
 };
 
-const buyToken = async() => {
+const buyToken = async (tokenId, address, price) => {
   try {
     const contract = await getEthereumContract();
     console.log(contract);
     const account = address;
     console.log(account);
     // const weiValue = Web3.utils.toWei(price, "ether");
-    const weiValue = window.web3.utils.toWei(price.toString(), "ether");
-    console.log(weiValue);
-    const mintPrice = window.web3.utils.toWei("0.01", "ether");
-    // const wei = Number(weiValue);
-    // console.log(wei);
-    const uri = "abcd";
-    // const tx = await contract.methods
-    //   .createNFT("uri", '2')
-    //   .send({ from: account, gas: 3000000 })
-    //   .on("transactionHash", function (hash) {
-    //     console.log(hash);
-    //   })
-    //   .on("confirmation", function (confirmationNumber, receipt) {
-    //     console.log(receipt);
-    //   })
-    //   .on("receipt", (receipt) => {
-    //     console.log(receipt);
-    //   });
-    const gasEstimate = await contract.methods.buyToken("3").estimateGas({
-      value: window.web3.utils.toWei("0.01", "ether"),
+    // const weiValue = window.web3.utils.toWei(price.toString(), "ether");
+    // console.log(weiValue);
+    // const mintPrice = window.web3.utils.toWei("0.01", "ether");
+
+    const gasEstimate = await contract.methods.buyToken(tokenId).estimateGas({
+      value: window.web3.utils.toWei(price, "ether"),
       from: account,
     });
     console.log(gasEstimate);
 
-    const encode = await contract.methods.buyToken("3").encodeABI();
+    const encode = await contract.methods.buyToken(tokenId).encodeABI();
 
     const tx = await window.web3.eth.sendTransaction({
       from: account,
       to: NFT_CONTRACT_ADDRESS,
       gas: gasEstimate,
       data: encode,
-      value: window.web3.utils.toWei("0.01", "ether"),
+      value: window.web3.utils.toWei(price, "ether"),
     });
 
     return tx;
   } catch (error) {
     console.error(error);
   }
-}
+};
 
 // const performContribute = async (amount) => {
 //   try {
@@ -259,4 +247,4 @@ const buyToken = async() => {
 //   throw new Error("No ethereum object.");
 // };
 
-export { createNFT, getBalance };
+export { createNFT, getBalance, buyToken };

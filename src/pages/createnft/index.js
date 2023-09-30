@@ -65,18 +65,20 @@ const Create = () => {
       const metadata = await client.store(nft);
       console.log(metadata.url);
       const uri = metadata.url;
-      const formData = {
-        name: nameRef.current.value,
-        price: priceRef.current.value,
-        description: descriptionRef.current.value,
-        link: linkRef.current,
-      };
 
       const transaction = await createNFT(uri, priceRef.current.value, address);
       console.log(transaction);
 
       const tokenId = uint256ToInt(transaction.logs[0].topics[3]);
       const tokenids = tokenId.toString();
+      const formData = {
+        name: nameRef.current.value,
+        price: priceRef.current.value,
+        description: descriptionRef.current.value,
+        link: linkRef.current,
+        id: tokenId,
+        owner: address,
+      };
       console.log(tokenids);
       console.log(formData);
       const NFTDocRef = doc(db, "nfts", tokenids);
@@ -93,8 +95,8 @@ const Create = () => {
           onSubmit={listNFT}
           className="bg-black shadow-pink-800 rounded px-8 pt-4 pb-8 mb-4"
         >
-          <h3 className="text-center font-bold text-white bg-blue-400 rounded-md p-2 mb-8">
-            Upload the NFT
+          <h3 className="text-center text-4xl font-bold text-white rounded-md p-2 mb-8">
+            Upload NFT
           </h3>
           <div className="mb-4">
             <label
@@ -160,13 +162,13 @@ const Create = () => {
             ></input>
           </div>
           <br></br>
-          <div className="text-green text-center">List you NFT here!</div>
           <button
             type="submit"
-            className="font-bold mt-10 w-full bg-green-500 text-white rounded p-2 shadow-lg"
+            className="font-bold mt-1 w-full bg-green-500 text-white rounded p-2 shadow-lg"
           >
             List NFT
           </button>
+          <div className="text-green text-blue-100 text-center">List your NFT here!</div>
         </form>
       </div>
     </div>
