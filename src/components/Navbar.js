@@ -1,8 +1,14 @@
 import { ConnectKitButton } from "connectkit";
-import React from "react";
+import React, {useEffect} from "react";
 import Link from "next/link";
+import Web3 from "web3";
 
 const Navbar = () => {
+  useEffect(() => {
+    const { ethereum } = window;
+    window.web3 = new Web3(ethereum);
+    window.web3 = new Web3(window.web3.currentProvider);
+  }, []);
   return (
     <div>
       <nav class="bg-white border-gray-200 dark:bg-gray-900">

@@ -3,7 +3,27 @@ import { db } from "@/config/firebase";
 import { getDownloadURL, ref, uploadBytes } from "firebase/storage";
 import { v4 } from "uuid";
 import { storage } from "@/config/firebase";
-import { addDoc, collection, setDoc } from "firebase/firestore";
+import { addDoc, collection, doc, setDoc } from "firebase/firestore";
+import { createNFT } from "@/config/blockchain";
+import { useAccount } from "wagmi";
+import { NFTStorage } from "nft.storage";
+
+function uint256ToInt(uint256Value) {
+  // Maximum safe integer value in JavaScript (2^53 - 1)
+  const maxSafeInt = Number.MAX_SAFE_INTEGER;
+
+  // Convert the uint256 value to a BigInt to handle 256-bit integers
+  const bigIntValue = BigInt(uint256Value);
+
+  // Check if the value is greater than the maximum safe integer value
+  if (bigIntValue > BigInt(maxSafeInt)) {
+    // If it is, return the value as a BigInt
+    return bigIntValue;
+  } else {
+    // If it's within the safe integer range, convert it to a regular int
+    return Number(bigIntValue);
+  }
+}
 
 const Create = () => {
   const nameRef = useRef();
@@ -12,6 +32,7 @@ const Create = () => {
   const linkRef = useRef();
   const [imageUpload, setImageUpload] = useState();
   const [Image, setImage] = useState();
+  const { address } = useAccount();
 
   const uploadFile = async () => {
     const imageRef = ref(storage, `images/${v4()}`);
@@ -21,18 +42,49 @@ const Create = () => {
   };
 
   const listNFT = async (e) => {
-    e.preventDefault();
-    await uploadFile();
-    const formData = {
-      name: nameRef.current.value,
-      price: priceRef.current.value,
-      descrtiption: descriptionRef.current.value,
-      link: linkRef.current,
-    };
-    console.log(formData);
-    const NFTDocRef = collection(db, "nfts");
-    setDoc(NFTDocRef, formData);
-    alert("done");
+    try {
+      e.preventDefault();
+      await uploadFile();
+      const nft = {
+        image: imageUpload,
+        name: nameRef.current.value,
+        description: descriptionRef.current.value,
+        external_url: "Google.com",
+        attributes: [
+          {
+            trait_type: "Category",
+            value: "Collectibles",
+          },
+        ],
+      };
+      console.log(nft);
+      console.log("Uploading Metadata to IPFS ....");
+      const client = new NFTStorage({
+        token: process.env.NEXT_PUBLIC_NFT_STORAGE_API_TOKEN,
+      });
+      const metadata = await client.store(nft);
+      console.log(metadata.url);
+      const uri = metadata.url;
+      const formData = {
+        name: nameRef.current.value,
+        price: priceRef.current.value,
+        description: descriptionRef.current.value,
+        link: linkRef.current,
+      };
+
+      const transaction = await createNFT(uri, priceRef.current.value, address);
+      console.log(transaction);
+
+      const tokenId = uint256ToInt(transaction.logs[0].topics[3]);
+      const tokenids = tokenId.toString();
+      console.log(tokenids);
+      console.log(formData);
+      const NFTDocRef = doc(db, "nfts", tokenids);
+      setDoc(NFTDocRef, formData);
+      alert("done");
+    } catch (error) {
+      console.error(error);
+    }
   };
   return (
     <div>
