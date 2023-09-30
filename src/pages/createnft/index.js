@@ -1,15 +1,20 @@
 import React, { useRef, useState } from "react";
 import { db } from "@/config/firebase";
+// Firebase storage imports
 import { getDownloadURL, ref, uploadBytes } from "firebase/storage";
-import { v4 } from "uuid";
+import { v4 } from "uuid"; // UUID for generating unique IDs
 import { storage } from "@/config/firebase";
-import { addDoc, collection, doc, setDoc } from "firebase/firestore";
+// Firestore imports
+import { doc, setDoc } from "firebase/firestore";
+// Blockchain function to create NFT
 import { createNFT } from "@/config/blockchain";
-import { useAccount } from "wagmi";
-import { NFTStorage } from "nft.storage";
-import toast, { Toaster } from "react-hot-toast";
-import { useRouter } from "next/router";
+import { useAccount } from "wagmi"; // Hook to get account details
+import { NFTStorage } from "nft.storage"; // IPFS storage for NFTs
+import toast, { Toaster } from "react-hot-toast"; // Toast notifications
+import { useRouter } from "next/router"; // Next.js router
 
+
+// Function to convert uint256 to integer
 function uint256ToInt(uint256Value) {
   // Maximum safe integer value in JavaScript (2^53 - 1)
   const maxSafeInt = Number.MAX_SAFE_INTEGER;
@@ -28,14 +33,16 @@ function uint256ToInt(uint256Value) {
 }
 
 const Create = () => {
+   // References for form inputs
   const nameRef = useRef();
   const priceRef = useRef();
   const descriptionRef = useRef();
   const linkRef = useRef();
-  const [imageUpload, setImageUpload] = useState();
-  const { address } = useAccount();
-  const router = useRouter();
+  const [imageUpload, setImageUpload] = useState(); // State for uploaded image
+  const { address } = useAccount(); // Get user's blockchain address
+  const router = useRouter(); // Next.js router instance
 
+   // Function to upload the image to Firebase storage
   const uploadFile = async () => {
     const imageRef = ref(storage, `images/${v4()}`);
     await uploadBytes(imageRef, imageUpload);
@@ -43,6 +50,7 @@ const Create = () => {
     linkRef.current = downloadUrl;
   };
 
+    // Function to list the NFT
   const listNFT = async (e) => {
     try {
       e.preventDefault();
@@ -93,6 +101,7 @@ const Create = () => {
   return (
     <div>
       <Toaster />
+        {/* NFT form */}
       <div className="flex flex-col place-items-center mt-5" id="nftForm">
         <form
           onSubmit={listNFT}

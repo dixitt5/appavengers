@@ -73,14 +73,14 @@ const Navbar = () => {
           </button>
           <div class="hidden w-full md:block md:w-auto" id="navbar-default">
             <ul class="font-medium items-center flex flex-col p-4 md:p-0 mt-4 border border-gray-100 rounded-lg bg-gray-50 md:flex-row md:space-x-8 md:mt-0 md:border-0 md:bg-white dark:bg-gray-800 md:dark:bg-gray-900 dark:border-gray-700">
-              <li>
+              <li className="hover:text-blue-400">
                 <Link href={`https://mumbai.polygonscan.com/address/${address}`}>
                   <div>
                     User Balance : {fetched ? <span>{userBalance} MATIC</span> : <span>0</span> }
                   </div>
                 </Link>
               </li>
-              <li>
+              <li className="underline hover:text-blue-400">
                 <Link href="/createnft">Create</Link>
               </li>
               <li>

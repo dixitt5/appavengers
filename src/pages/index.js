@@ -1,6 +1,8 @@
+// Importing necessary modules and components
 import Image from "next/image";
-import { Inter } from "next/font/google";
-import { db } from "@/config/firebase";
+import { Inter } from "next/font/google"; // Google font
+import { db } from "@/config/firebase"; // Firebase configuration
+// Firestore imports for database operations
 import {
   collection,
   getDocs,
@@ -12,17 +14,18 @@ import {
   updateDoc,
 } from "firebase/firestore";
 import { useState, useEffect } from "react";
-import { useAccount } from "wagmi";
-import { buyToken } from "@/config/blockchain";
-import toast, { Toaster } from "react-hot-toast";
+import { useAccount } from "wagmi"; // Hook to get account details
+import { buyToken } from "@/config/blockchain"; // Function to buy token
+import toast, { Toaster } from "react-hot-toast"; // Toast notifications
 
-const inter = Inter({ subsets: ["latin"] });
+const inter = Inter({ subsets: ["latin"] }); // Google font configuration
 
 export default function Home() {
-  const [tokens, setTokens] = useState([]);
-  const [fetchedTrue, setFetchedData] = useState(false);
-  const { address } = useAccount();
+  const [tokens, setTokens] = useState([]); // State to store NFT tokens
+  const [fetchedTrue, setFetchedData] = useState(false); // State to check if data has been fetched
+  const { address } = useAccount(); // Get user's blockchain address
 
+  // Function to buy an NFT
   const buyNFT = async (tokenId) => {
     try {
       const tokenIds = tokenId.toString();
@@ -44,12 +47,12 @@ export default function Home() {
     }
   };
 
+  // Fetch NFT collections when component mounts
   useEffect(() => {
     const getNFTCollections = async () => {
       try {
         const nftsRef = collection(db, "nfts");
         const q = query(nftsRef, orderBy("id", "desc"), limit(48));
-        // Fetch the first 50 NFTs
         const initialTokenData = [];
         const querySnapshot = await getDocs(q);
         querySnapshot.forEach((doc) => {
@@ -74,9 +77,11 @@ export default function Home() {
           Browse Through NFTs
         </h1>
       </div>
+      {/* Display NFTs if data has been fetched */}
       {fetchedTrue && (
         <div className="grid grid-cols-3 gap-3">
           {tokens.map((data) => {
+            // Display each NFT with its details
             return (
               <div key={data.id} className="border-2 ml-12 mt-5 mb-12 flex flex-col h-auto justify-between items-center rounded-lg w-32 md:w-72 shadow-2xl">
                 <Image
@@ -94,6 +99,7 @@ export default function Home() {
                   <div className="ml-2">
                     Price: <span>{data.price} MATIC</span>
                   </div>
+                  {/* Check if the current user owns the NFT */}
                   {address == data.owner ? (
                     <div className="text-black bg-white rounded p-1 my-2 mr-2">
                       Owned
