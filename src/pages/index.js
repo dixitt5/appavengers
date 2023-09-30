@@ -9,11 +9,12 @@ import {
   query,
   orderBy,
   limit,
-  updateDoc
+  updateDoc,
 } from "firebase/firestore";
 import { useState, useEffect } from "react";
 import { useAccount } from "wagmi";
 import { buyToken } from "@/config/blockchain";
+import toast, { Toaster } from "react-hot-toast";
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -35,9 +36,11 @@ export default function Home() {
       await updateDoc(ref, {
         owner: address,
       });
+      toast.success("NFT Bought Successfully!");
       window.location.reload();
     } catch (error) {
       console.error(error);
+      toast.error("Error When Buying!");
     }
   };
 
@@ -65,6 +68,7 @@ export default function Home() {
     <main
       className={`flex bg-slate-950 min-h-max flex-col p-24 ${inter.className}`}
     >
+      <Toaster />
       <div>
         <h1 className="text-4xl font-bold text-center mb-4">
           Browse Through NFTs
@@ -74,7 +78,7 @@ export default function Home() {
         <div className="grid grid-cols-3 gap-3">
           {tokens.map((data) => {
             return (
-              <div className="border-2 ml-12 mt-5 mb-12 flex flex-col h-auto justify-between items-center rounded-lg w-32 md:w-72 shadow-2xl">
+              <div key={data.id} className="border-2 ml-12 mt-5 mb-12 flex flex-col h-auto justify-between items-center rounded-lg w-32 md:w-72 shadow-2xl">
                 <Image
                   src={data.link}
                   alt="nft"
@@ -82,19 +86,22 @@ export default function Home() {
                   height={200}
                   className="rounded-lg object-fill"
                 />
-                <div className="text-white w-full p-2 bg-gradient-to-t from-[#454545] to-transparent rounded-lg pt-5 -mt-20">
+                <div className="text-white w-full p-2 bg-gradient-to-t from-[#454545] min-h-[50px] to-transparent rounded-lg pt-5 -mt-20">
                   <strong className="text-xl">{data.name}</strong>
                   <p className="display-inline">{data.description}</p>
                 </div>
-                <div>
+                <div className="flex flex-row items-center justify-between w-full">
+                  <div className="ml-2">
+                    Price: <span>{data.price} MATIC</span>
+                  </div>
                   {address == data.owner ? (
-                    <div className="text-black bg-white rounded p-2 my-2">
+                    <div className="text-black bg-white rounded p-1 my-2 mr-2">
                       Owned
                     </div>
                   ) : (
                     <button
                       onClick={() => buyNFT(data.id)}
-                      className="bg-blue-400 w-full rounded p-2 my-2"
+                      className="bg-blue-400 rounded p-1 my-2 mr-2"
                     >
                       Buy
                     </button>

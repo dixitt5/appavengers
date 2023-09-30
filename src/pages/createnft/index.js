@@ -7,6 +7,8 @@ import { addDoc, collection, doc, setDoc } from "firebase/firestore";
 import { createNFT } from "@/config/blockchain";
 import { useAccount } from "wagmi";
 import { NFTStorage } from "nft.storage";
+import toast, { Toaster } from "react-hot-toast";
+import { useRouter } from "next/router";
 
 function uint256ToInt(uint256Value) {
   // Maximum safe integer value in JavaScript (2^53 - 1)
@@ -31,8 +33,8 @@ const Create = () => {
   const descriptionRef = useRef();
   const linkRef = useRef();
   const [imageUpload, setImageUpload] = useState();
-  const [Image, setImage] = useState();
   const { address } = useAccount();
+  const router = useRouter();
 
   const uploadFile = async () => {
     const imageRef = ref(storage, `images/${v4()}`);
@@ -65,10 +67,10 @@ const Create = () => {
       const metadata = await client.store(nft);
       console.log(metadata.url);
       const uri = metadata.url;
-
+      toast.success("Image Uploaded on IPFS Successfully!");
       const transaction = await createNFT(uri, priceRef.current.value, address);
       console.log(transaction);
-
+      toast.success("NFT Minted Successfully!");
       const tokenId = uint256ToInt(transaction.logs[0].topics[3]);
       const tokenids = tokenId.toString();
       const formData = {
@@ -83,13 +85,14 @@ const Create = () => {
       console.log(formData);
       const NFTDocRef = doc(db, "nfts", tokenids);
       setDoc(NFTDocRef, formData);
-      alert("done");
+      router.push("/");
     } catch (error) {
       console.error(error);
     }
   };
   return (
     <div>
+      <Toaster />
       <div className="flex flex-col place-items-center mt-5" id="nftForm">
         <form
           onSubmit={listNFT}
@@ -157,7 +160,6 @@ const Create = () => {
               type={"file"}
               onChange={(event) => {
                 setImageUpload(event.target.files[0]);
-                setImage(URL.createObjectURL(event.target.files[0]));
               }}
             ></input>
           </div>
@@ -168,7 +170,9 @@ const Create = () => {
           >
             List NFT
           </button>
-          <div className="text-green text-blue-100 text-center">List your NFT here!</div>
+          <div className="text-green text-blue-100 text-center">
+            List your NFT here!
+          </div>
         </form>
       </div>
     </div>
